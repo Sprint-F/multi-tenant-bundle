@@ -1,0 +1,45 @@
+{
+    "name": "sprintf/multi-tenant-bundle",
+    "description": "Symfony Multi-Tenant Bundle by Sprint-F.RU",
+    "license": "BSD-3-Clause",
+    "type": "symfony-bundle",
+    "keywords": [
+        "Milti-Tenant"
+    ],
+    "authors": [
+        {
+            "name": "Albert Stepantsev",
+            "email": "albert.stepantsev@sprintf.ru"
+        }
+    ],
+    "homepage": "https://sprintf.ru",
+    "require": {
+        "php": "^8.3",
+        "symfony/dependency-injection": "^7.0",
+        "symfony/flex": "*",
+        "symfony/http-kernel": "^7.0",
+        "symfony/service-contracts": "*",
+        "symfony/translation": "^7.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.1",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-phpbrowser": "*",
+        "friendsofphp/php-cs-fixer": "^3.26",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "SprintF\\Bundle\\MultiTenant\\": "src/",
+            "SprintF\\Bundle\\MultiTenant\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/flex": true
+        },
+        "sort-packages": true
+    }
+}
