@@ -8,13 +8,13 @@ namespace SprintF\Bundle\MultiTenant\Tenant;
 interface TenantInterface
 {
     /**
-     * ID арендатора.
-     * В редких случаях, к примеру: до сохранения в базу данных, может быть null.
+     * Уникальный идентификатор сущности арендатора.
+     * null предусматривается на случай "новой" сущности, еще не получившей идентификатор.
      */
     public function getId(): int|string|\Stringable|null;
 
     /**
-     * Символическое имя арендатора.
+     * Уникальное символическое имя арендатора.
      */
     public function getSlug(): string;
 }
