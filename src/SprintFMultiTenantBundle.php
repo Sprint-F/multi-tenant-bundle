@@ -11,11 +11,13 @@ class SprintFMultiTenantBundle extends AbstractBundle
 {
     public function configure(DefinitionConfigurator $definition): void
     {
-        $definition->rootNode('')
-            ->children()->scalarNode('tenant_entity')
-                ->defaultValue('\App\Entity\Tenant')
-                ->info('The fully qualified class name of tenant entity')
-            ->end() // tenant_entity
+        $definition->rootNode()
+            ->children()
+                ->scalarNode('tenant_entity')
+                    ->defaultValue('\App\Entity\Tenant')
+                    ->info('The fully qualified class name of tenant entity')
+                ->end() // tenant_entity
+            ->end() // children
         ;
     }
 
