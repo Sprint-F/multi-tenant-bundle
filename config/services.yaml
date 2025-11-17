@@ -1,0 +1,6 @@
+services:
+  SprintF\Bundle\MultiTenant\:
+    resource: '../src/*'
+    exclude: '../src/{DependencyInjection,Entity,Tests}'
+    autowire: true
+    autoconfigure: true
