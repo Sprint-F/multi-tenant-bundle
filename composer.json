@@ -42,5 +42,13 @@
             "symfony/flex": true
         },
         "sort-packages": true
+    },
+    "extra": {
+        "symfony": {
+            "endpoint": [
+                "https://api.github.com/repos/Sprint-F/multi-tenant-bundle-flex/contents/index.json",
+                "flex://defaults"
+            ]
+        }
     }
 }

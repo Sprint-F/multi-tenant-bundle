@@ -9,6 +9,19 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SprintFMultiTenantBundle extends AbstractBundle
 {
+    public function configure(DefinitionConfigurator $definition): void
+    {
+        $definition->rootNode()
+            ->children()
+                ->scalarNode('tenant_entity')
+                    ->cannotBeEmpty()
+                    ->defaultValue('\\App\\Entity\\Tenant')
+                    ->info('The fully qualified class name of tenant entity')
+                ->end() // tenant_entity
+            ->end() // children
+        ;
+    }
+
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $container->import('../config/services.yaml');
