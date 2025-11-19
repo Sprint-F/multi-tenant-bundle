@@ -1,8 +1,8 @@
 <?php
 
-namespace SprintF\Bundle\MultiTenant\Registry;
+namespace SprintF\Bundle\MultiTenant\Resolver;
 
-use SprintF\Bundle\MultiTenant\Resolver\TenantResolverInterface;
+use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Tenant\TenantInterface;
 use Symfony\Component\HttpFoundation\Request;
 

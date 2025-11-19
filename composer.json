@@ -15,8 +15,9 @@
     "homepage": "https://sprintf.ru",
     "require": {
         "php": "^8.3",
-        "symfony/dependency-injection": "^7.0",
+        "doctrine/orm": "^3.5",
         "symfony/config": "^7.0",
+        "symfony/dependency-injection": "^7.0",
         "symfony/flex": "*",
         "symfony/http-kernel": "^7.0",
         "symfony/service-contracts": "*",
@@ -49,6 +50,11 @@
                 "https://api.github.com/repos/Sprint-F/multi-tenant-bundle-flex/contents/index.json",
                 "flex://defaults"
             ]
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+
         }
     }
 }
