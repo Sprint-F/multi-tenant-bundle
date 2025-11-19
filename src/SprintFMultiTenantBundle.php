@@ -2,6 +2,8 @@
 
 namespace SprintF\Bundle\MultiTenant;
 
+use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
+use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Resolver\QueryTenantResolver;
 use SprintF\Bundle\MultiTenant\Resolver\TenantResolverInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -50,7 +52,16 @@ class SprintFMultiTenantBundle extends AbstractBundle
     {
         $container->import('../config/services.yaml');
 
+        // Регистрируем реестр арендаторов, указываем ему имя класса сущности арендатора.
+        $builder->register(DoctrineRepositoryTenantRegistry::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setArgument('$tenantEntityClass', $config['tenant_entity']);
+        $builder->setAlias(TenantRegistryInterface::class, DoctrineRepositoryTenantRegistry::class);
+
+        // Регистрируем конкретный резолвер арендаторов, выбирая на основе конфигурации бандла:
         switch ($config['resolver']) {
+            // Резолвер на базе данных из get-параметров запроса
             case 'query':
                 $builder->register(QueryTenantResolver::class)
                     ->setAutowired(true)
