@@ -4,6 +4,7 @@ namespace SprintF\Bundle\MultiTenant;
 
 use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
 use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
+use SprintF\Bundle\MultiTenant\Resolver\DomainTenantResolver;
 use SprintF\Bundle\MultiTenant\Resolver\QueryTenantResolver;
 use SprintF\Bundle\MultiTenant\Resolver\TenantResolverInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -28,10 +29,10 @@ class SprintFMultiTenantBundle extends AbstractBundle
                 // Конфигурация резолвера арендатора
                 ->enumNode('resolver')
                     ->cannotBeEmpty()
-                    ->values(['query'])
+                    ->values(['query', 'domain'])
                     ->defaultValue('query')
                     ->info('The name of the tenant resolver')
-                ->end()
+                ->end() // resolver
 
                 // Конфигурация резолвера на основе данных из get-параметров запроса
                 ->arrayNode('query')
@@ -42,7 +43,20 @@ class SprintFMultiTenantBundle extends AbstractBundle
                             ->info('Query parameter name to use for tenant resolution')
                         ->end()
                     ->end()
-                ->end()
+                ->end() // query
+
+                // Конфигурация резолвера на основе хоста запроса
+                ->arrayNode('domain')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('domains_map')
+                            ->useAttributeAsKey('domain')
+                            ->scalarPrototype()->end()
+                            ->defaultValue([])
+                            ->info('Domains map (full domains to tenant slugs) for use for tenant resolution')
+                        ->end()
+                    ->end()
+                ->end() // domain
 
             ->end() // children
         ;
@@ -61,13 +75,22 @@ class SprintFMultiTenantBundle extends AbstractBundle
 
         // Регистрируем конкретный резолвер арендаторов, выбирая на основе конфигурации бандла:
         switch ($config['resolver']) {
-            // Резолвер на базе данных из get-параметров запроса
             case 'query':
+                // Резолвер на базе данных из get-параметров запроса
                 $builder->register(QueryTenantResolver::class)
                     ->setAutowired(true)
                     ->setAutoconfigured(true)
                     ->setArgument('$parameterName', $config['query']['parameter']);
                 $builder->setAlias(TenantResolverInterface::class, QueryTenantResolver::class);
+                break;
+
+            case 'domain':
+                // Резолвер на основе хоста запроса
+                $builder->register(DomainTenantResolver::class)
+                    ->setAutowired(true)
+                    ->setAutoconfigured(true)
+                    ->setArgument('$domainsMap', $config['domain']['domains_map']);
+                $builder->setAlias(TenantResolverInterface::class, DomainTenantResolver::class);
                 break;
         }
     }
