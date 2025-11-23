@@ -2,6 +2,7 @@
 
 namespace SprintF\Bundle\MultiTenant\EventListener;
 
+use Doctrine\ORM\EntityManagerInterface;
 use SprintF\Bundle\MultiTenant\Context\TenantContextInterface;
 use SprintF\Bundle\MultiTenant\Resolver\TenantResolverInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -14,6 +15,7 @@ class TenantEventListener
     public function __construct(
         private readonly TenantResolverInterface $resolver,
         private readonly TenantContextInterface $context,
+        private readonly ?EntityManagerInterface $em = null,
     ) {
     }
 
@@ -28,12 +30,21 @@ class TenantEventListener
         $request = $event->getRequest();
         $tenant = $this->resolver->resolveTenant($request);
 
+        // Если не удалось определить арендатора, то...
         if (null === $tenant) {
+            // ...устанавливаем в контексте арендатора в null
             $this->context->clearTenant();
+            // ...выключаем фильтр для запросов Doctrine
+            $this->em?->getFilters()['tenant_filter']->setParameter('tenant_id', null);
+            $this->em?->getFilters()->disable('tenant_filter');
 
             return;
         }
 
+        // Сохраняем ссылку на арендатора в контексте
         $this->context->setTenant($tenant);
+        // Включаем фильтр Doctrine
+        $this->em?->getFilters()['tenant_filter']->setParameter('tenant_id', $tenant->getId());
+        $this->em?->getFilters()->enable('tenant_filter');
     }
 }

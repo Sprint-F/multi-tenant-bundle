@@ -2,6 +2,7 @@
 
 namespace SprintF\Bundle\MultiTenant;
 
+use SprintF\Bundle\MultiTenant\DependencyInjection\Compiler\DoctrineFilterCompilerPass;
 use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
 use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Resolver\DomainTenantResolver;
@@ -64,6 +65,7 @@ class SprintFMultiTenantBundle extends AbstractBundle
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        // Импортируем оснвоной конфиг сервисов бандла.
         $container->import('../config/services.yaml');
 
         // Регистрируем реестр арендаторов, указываем ему имя класса сущности арендатора.
@@ -93,5 +95,10 @@ class SprintFMultiTenantBundle extends AbstractBundle
                 $builder->setAlias(TenantResolverInterface::class, DomainTenantResolver::class);
                 break;
         }
+    }
+
+    public function build(ContainerBuilder $container): void
+    {
+        $container->addCompilerPass(new DoctrineFilterCompilerPass());
     }
 }
