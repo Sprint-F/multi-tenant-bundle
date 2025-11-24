@@ -1,12 +1,16 @@
 <?php
 
-namespace SprintF\Bundle\MultiTenant\Doctrine;
+namespace SprintF\Bundle\MultiTenant\Doctrine\Filter;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Filter\SQLFilter;
-use SprintF\Bundle\MultiTenant\Entity\BelongsToTenantInterface;
-use SprintF\Bundle\MultiTenant\Entity\BelongsToTenantOptionalInterface;
+use SprintF\Bundle\MultiTenant\Doctrine\Entity\BelongsToTenantInterface;
+use SprintF\Bundle\MultiTenant\Doctrine\Entity\BelongsToTenantOptionalInterface;
 
+/**
+ * Фильтр для Doctrine.
+ * Добавляет к запросам условие вида "entity.tenant_id=:id", где :id - идентификатор текущего арендатора.
+ */
 class TenantFilter extends SQLFilter
 {
     public function addFilterConstraint(ClassMetadata $targetEntity, string $targetTableAlias): string

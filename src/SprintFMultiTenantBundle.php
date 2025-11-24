@@ -2,7 +2,7 @@
 
 namespace SprintF\Bundle\MultiTenant;
 
-use SprintF\Bundle\MultiTenant\Doctrine\TenantFilter;
+use SprintF\Bundle\MultiTenant\Doctrine\Filter\TenantFilter;
 use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
 use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Resolver\DomainTenantResolver;
@@ -17,6 +17,7 @@ class SprintFMultiTenantBundle extends AbstractBundle
 {
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        // Конфигурируем Doctrine, добавляя к ее конфигу фильтр запросов TenantFilter
         $builder->prependExtensionConfig('doctrine', ['orm' => ['filters' => [
             'tenant_filter' => [
                 'class' => TenantFilter::class,
@@ -27,6 +28,7 @@ class SprintFMultiTenantBundle extends AbstractBundle
 
     public function configure(DefinitionConfigurator $definition): void
     {
+        // Описываем конфигурацию бандла
         $definition->rootNode()
             ->children()
 

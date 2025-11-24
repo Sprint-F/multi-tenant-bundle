@@ -1,6 +1,6 @@
 <?php
 
-namespace SprintF\Bundle\MultiTenant\Entity;
+namespace SprintF\Bundle\MultiTenant\Doctrine\Entity;
 
 use SprintF\Bundle\MultiTenant\Tenant\TenantInterface;
 
