@@ -2,7 +2,7 @@
 
 namespace SprintF\Bundle\MultiTenant;
 
-use SprintF\Bundle\MultiTenant\DependencyInjection\Compiler\DoctrineFilterCompilerPass;
+use SprintF\Bundle\MultiTenant\Doctrine\TenantFilter;
 use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
 use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Resolver\DomainTenantResolver;
@@ -15,6 +15,16 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SprintFMultiTenantBundle extends AbstractBundle
 {
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        $builder->prependExtensionConfig('doctrine', ['orm' => ['filters' => [
+            'tenant_filter' => [
+                'class' => TenantFilter::class,
+                'enabled' => false,
+            ],
+        ]]]);
+    }
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
@@ -95,10 +105,5 @@ class SprintFMultiTenantBundle extends AbstractBundle
                 $builder->setAlias(TenantResolverInterface::class, DomainTenantResolver::class);
                 break;
         }
-    }
-
-    public function build(ContainerBuilder $container): void
-    {
-        $container->addCompilerPass(new DoctrineFilterCompilerPass());
     }
 }
