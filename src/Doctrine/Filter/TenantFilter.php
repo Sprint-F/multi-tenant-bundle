@@ -22,10 +22,28 @@ class TenantFilter extends SQLFilter
             return '';
         }
 
+        // Если мы работаем вне контекста какого-либо арендатора, то возвращать нужно все сущности,
+        // фильтр не нужен:
         if (!$this->hasParameter('tenant_id') || empty(trim($this->getParameter('tenant_id'), '\''))) {
             return '';
         }
 
-        return $targetTableAlias.'.'.$targetEntity->getSingleAssociationJoinColumnName('tenant').' = '.$this->getParameter('tenant_id');
+        $targetTenantColumn = $targetEntity->getSingleAssociationJoinColumnName('tenant');
+        $targetTenantId = $this->getParameter('tenant_id');
+
+        // Если наша сущность может принадлежать арендатору, а может не принадлежать (быть общесистемной),
+        // то в случае если мы работаем в контексте арендатора, мы возвращаем "его" и "общие" сущности".
+        if ($targetEntity->reflClass->implementsInterface(BelongsToTenantOptionalInterface::class)) {
+            return sprintf('%s.%s = %s OR %s.%s IS NULL',
+                $targetTableAlias,
+                $targetTenantColumn,
+                $targetTenantId,
+                $targetTableAlias,
+                $targetTenantColumn,
+            );
+        }
+
+        // Если же сущность строго принадлежит какому-либо арендатору, то возвращать нужно только "его" сущности.
+        return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
     }
 }

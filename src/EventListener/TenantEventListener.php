@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Слушатель события kernel.request
+ * Слушатель события kernel.request.
  *
  * Определяет текущего арендатора, используя резовлер, устанавливает контекст аренды, активирует фильтр запросов.
  */
