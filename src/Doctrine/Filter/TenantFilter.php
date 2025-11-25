@@ -26,6 +26,6 @@ class TenantFilter extends SQLFilter
             return '';
         }
 
-        return $targetTableAlias.'tenant = '.$this->getParameter('tenant_id');
+        return $targetTableAlias.'.'.$targetEntity->getSingleAssociationJoinColumnName('tenant').' = '.$this->getParameter('tenant_id');
     }
 }
