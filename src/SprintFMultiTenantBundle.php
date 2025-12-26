@@ -3,6 +3,7 @@
 namespace SprintF\Bundle\MultiTenant;
 
 use SprintF\Bundle\MultiTenant\Doctrine\Filter\TenantFilter;
+use SprintF\Bundle\MultiTenant\EventListener\TenantEventListener;
 use SprintF\Bundle\MultiTenant\Registry\DoctrineRepositoryTenantRegistry;
 use SprintF\Bundle\MultiTenant\Registry\TenantRegistryInterface;
 use SprintF\Bundle\MultiTenant\Resolver\DomainTenantResolver;
@@ -39,6 +40,13 @@ class SprintFMultiTenantBundle extends AbstractBundle
                     ->defaultValue('\\App\\Entity\\Tenant')
                     ->info('The fully qualified class name of tenant entity')
                 ->end() // tenant_entity
+
+                // Конфигурация поля в моделях, указывающего на арендатора
+                ->scalarNode('tenant_field')
+                    ->cannotBeEmpty()
+                    ->defaultValue('tenant')
+                    ->info('The name of the tenant field in entities')
+                ->end() // tenant_field
 
                 // Конфигурация резолвера арендатора
                 ->enumNode('resolver')
@@ -106,6 +114,12 @@ class SprintFMultiTenantBundle extends AbstractBundle
             ->setAutoconfigured(true)
             ->setArgument('$tenantEntityClass', $config['tenant_entity']);
         $builder->setAlias(TenantRegistryInterface::class, DoctrineRepositoryTenantRegistry::class);
+
+        // Передаем важный параметр в TenantEventListener
+        $builder->register(TenantEventListener::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setArgument('$tenantFieldName', $config['tenant_field']);
 
         // Регистрируем конкретный резолвер арендаторов, выбирая на основе конфигурации бандла:
         switch ($config['resolver']) {

@@ -24,11 +24,15 @@ class TenantFilter extends SQLFilter
 
         // Если мы работаем вне контекста какого-либо арендатора, то возвращать нужно все сущности,
         // фильтр не нужен:
-        if (!$this->hasParameter('tenant_id') || empty(trim($this->getParameter('tenant_id'), '\''))) {
+        if (
+            !$this->hasParameter('tenant_id')
+            || empty(trim($this->getParameter('tenant_id'), '\''))
+            || !$this->hasParameter('tenant_field')
+        ) {
             return '';
         }
 
-        $targetTenantColumn = $targetEntity->getSingleAssociationJoinColumnName('tenant');
+        $targetTenantColumn = $targetEntity->getSingleAssociationJoinColumnName($this->getParameter('tenant_field'));
         $targetTenantId = $this->getParameter('tenant_id');
 
         // Если наша сущность может принадлежать арендатору, а может не принадлежать (быть общесистемной),

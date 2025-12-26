@@ -21,6 +21,7 @@ class TenantEventListener
         private readonly TenantResolverInterface $resolver,
         private readonly TenantContextInterface $context,
         private readonly ?EntityManagerInterface $em = null,
+        private readonly string $tenantFieldName,
     ) {
     }
 
@@ -52,5 +53,6 @@ class TenantEventListener
         // Включаем фильтр Doctrine
         $this->em?->getFilters()->enable('tenant_filter');
         $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_id', $tenant->getId());
+        $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_field', $this->tenantFieldName);
     }
 }
