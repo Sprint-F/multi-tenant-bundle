@@ -32,7 +32,9 @@ class TenantFilter extends SQLFilter
             return '';
         }
 
-        $targetTenantColumn = $targetEntity->getSingleAssociationJoinColumnName($this->getParameter('tenant_field'));
+        $targetTenantColumn = $targetEntity->getSingleAssociationJoinColumnName(
+            trim($this->getParameter('tenant_field'), '\'')
+        );
         $targetTenantId = $this->getParameter('tenant_id');
 
         // Если наша сущность может принадлежать арендатору, а может не принадлежать (быть общесистемной),
