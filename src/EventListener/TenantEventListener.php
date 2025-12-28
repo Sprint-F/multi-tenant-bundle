@@ -32,6 +32,10 @@ class TenantEventListener
             return;
         }
 
+        // Включаем фильтр Doctrine
+        $this->em?->getFilters()->enable('tenant_filter');
+        $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_field', $this->tenantFieldName);
+
         // Определяем арендатора исходя из данных запроса и используя резолвер.
         $request = $event->getRequest();
         $tenant = $this->resolver->resolveTenant($request);
@@ -40,19 +44,15 @@ class TenantEventListener
         if (null === $tenant) {
             // ...устанавливаем в контексте арендатора в null
             $this->context->clearTenant();
-            // ...выключаем фильтр для запросов Doctrine
-            if ($this->em?->getFilters()->isEnabled('tenant_filter')) {
-                $this->em?->getFilters()->disable('tenant_filter');
-            }
+            // ...и передаем эту информацию в фильтр через его параметр
+            $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_id', null);
 
             return;
         }
 
         // Сохраняем ссылку на арендатора в контексте
         $this->context->setTenant($tenant);
-        // Включаем фильтр Doctrine
-        $this->em?->getFilters()->enable('tenant_filter');
+        // И передаем в параметры фильтра Doctrine
         $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_id', $tenant->getId());
-        $this->em?->getFilters()->getFilter('tenant_filter')->setParameter('tenant_field', $this->tenantFieldName);
     }
 }

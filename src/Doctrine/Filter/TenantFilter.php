@@ -51,19 +51,64 @@ class TenantFilter extends SQLFilter
         // ID арендатора, подготовленный к вставке в запрос
         $targetTenantId = $this->getParameter('tenant_id');
 
-        // Если наша сущность может принадлежать арендатору, а может не принадлежать (быть общесистемной),
-        // то в случае если мы работаем в контексте арендатора, мы возвращаем "его" и "общие" сущности".
-        if ($targetEntity->reflClass->implementsInterface(BelongsToTenantOptionalInterface::class)) {
-            return sprintf('%s.%s = %s OR %s.%s IS NULL',
-                $targetTableAlias,
-                $targetTenantColumn,
-                $targetTenantId,
-                $targetTableAlias,
-                $targetTenantColumn,
-            );
+        switch ($isolation) {
+            // Если установлен ПОЛНЫЙ уровень изоляции, то...
+            case TenantAwareIsolation::FULL:
+                if (null === $tenant) {
+                    // ... в общем контексте доступны только общие сущности
+                    return $targetTableAlias.'.'.$targetTenantColumn.' IS NULL';
+                } else {
+                    // ... в контексте арендатора - только его сущности
+                    return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
+                }
+                break;
+
+                // Если установлен ПРИВАТНЫЙ уровень изоляции, то...
+            case TenantAwareIsolation::PRIVATE:
+                if (null === $tenant) {
+                    // ... в общем контексте доступны все сущности
+                    return '';
+                } else {
+                    // ... в контексте арендатора - только его сущности
+                    return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
+                }
+                break;
+
+                // Если установлен ОБЩИЙ уровень изоляции, то...
+            case TenantAwareIsolation::COMMON:
+                if (null === $tenant) {
+                    // ... в общем контексте доступны только общие сущности
+                    return $targetTableAlias.'.'.$targetTenantColumn.' IS NULL';
+                } else {
+                    // ... в контексте арендатора - его сущности и общие сущности
+                    return sprintf('%s.%s = %s OR %s.%s IS NULL',
+                        $targetTableAlias,
+                        $targetTenantColumn,
+                        $targetTenantId,
+                        $targetTableAlias,
+                        $targetTenantColumn,
+                    );
+                }
+                break;
+
+                // Если установлен ГЕНЕРАЛЬНЫЙ уровень изоляции, то...
+            case TenantAwareIsolation::GENERAL:
+                if (null === $tenant) {
+                    // ... в общем контексте доступны все сущности
+                    return '';
+                } else {
+                    // ... в контексте арендатора - его сущности и общие сущности
+                    return sprintf('%s.%s = %s OR %s.%s IS NULL',
+                        $targetTableAlias,
+                        $targetTenantColumn,
+                        $targetTenantId,
+                        $targetTableAlias,
+                        $targetTenantColumn,
+                    );
+                }
+                break;
         }
 
-        // Если же сущность строго принадлежит какому-либо арендатору, то возвращать нужно только "его" сущности.
-        return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
+        return '';
     }
 }
