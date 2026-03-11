@@ -5,13 +5,14 @@ namespace SprintF\Bundle\MultiTenant\Doctrine\Filter;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 use SprintF\Bundle\MultiTenant\Attribute\AsTenantAware;
-use SprintF\Bundle\MultiTenant\Attribute\TenantAwareIsolation;
+use SprintF\Bundle\MultiTenant\Attribute\CommonContextIsolation;
+use SprintF\Bundle\MultiTenant\Attribute\PrivateContextIsolation;
 use SprintF\Bundle\MultiTenant\Doctrine\Entity\BelongsToTenantInterface;
 use SprintF\Bundle\MultiTenant\Doctrine\Entity\BelongsToTenantOptionalInterface;
 
 /**
  * Фильтр для Doctrine.
- * Добавляет к запросам условие вида "entity.tenant_id=:id", где :id - идентификатор текущего арендатора.
+ * Добавляет к запросам условия вида "entity.tenant_id=:id", где :id - идентификатор текущего арендатора.
  */
 class TenantFilter extends SQLFilter
 {
@@ -25,14 +26,17 @@ class TenantFilter extends SQLFilter
             return '';
         }
 
-        // Определяем уровень изоляции данной сущности. Берем информацию из атрибута #[AsTenantAware]
+        // Определяем уровни изоляции данной сущности. Берем информацию из атрибута #[AsTenantAware]
         $tenantAwareAttributes = $targetEntity->reflClass?->getAttributes(AsTenantAware::class);
         if (!empty($tenantAwareAttributes)) {
+            /** @var AsTenantAware $attribute */
             $attribute = $tenantAwareAttributes[0]->newInstance();
             /** @var AsTenantAware $isolation */
-            $isolation = $attribute->isolation;
+            $commonIsolation = $attribute->commonContextIsolation;
+            $privateIsolation = $attribute->privateContextIsolation;
         } else {
-            $isolation = TenantAwareIsolation::FULL;
+            $commonIsolation = CommonContextIsolation::COMMON;
+            $privateIsolation = PrivateContextIsolation::TENANT;
         }
 
         // Определим контекст аренды:
@@ -51,36 +55,25 @@ class TenantFilter extends SQLFilter
         // ID арендатора, подготовленный к вставке в запрос
         $targetTenantId = $this->getParameter('tenant_id');
 
-        switch ($isolation) {
-            // Если установлен ПОЛНЫЙ уровень изоляции, то...
-            case TenantAwareIsolation::FULL:
-                if (null === $tenant) {
-                    // ... в общем контексте доступны только общие сущности
+        // Далее, в зависимости от контекста аренды и уровня изоляции, строим запрос фильтра:
+        if (null === $tenant) {
+            // Если мы в общем контексте и...
+            switch ($commonIsolation) {
+                case CommonContextIsolation::COMMON:
+                    // Сущность изолирована (доступны только общие сущности)
                     return $targetTableAlias.'.'.$targetTenantColumn.' IS NULL';
-                } else {
-                    // ... в контексте арендатора - только его сущности
-                    return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
-                }
-                break;
-
-                // Если установлен ПРИВАТНЫЙ уровень изоляции, то...
-            case TenantAwareIsolation::PRIVATE:
-                if (null === $tenant) {
-                    // ... в общем контексте доступны все сущности
+                case CommonContextIsolation::ALL:
+                    // Сущность не изолирована (доступны все)
                     return '';
-                } else {
-                    // ... в контексте арендатора - только его сущности
+            }
+        } else {
+            // Если мы в частном контексте и...
+            switch ($privateIsolation) {
+                case PrivateContextIsolation::TENANT:
+                    // Сущность изолирована (доступны только свои)
                     return $targetTableAlias.'.'.$targetTenantColumn.' = '.$targetTenantId;
-                }
-                break;
-
-                // Если установлен ОБЩИЙ уровень изоляции, то...
-            case TenantAwareIsolation::COMMON:
-                if (null === $tenant) {
-                    // ... в общем контексте доступны только общие сущности
-                    return $targetTableAlias.'.'.$targetTenantColumn.' IS NULL';
-                } else {
-                    // ... в контексте арендатора - его сущности и общие сущности
+                case PrivateContextIsolation::COMMON:
+                    // Сущность частично изолирована (доступны и свои и общие)
                     return sprintf('%s.%s = %s OR %s.%s IS NULL',
                         $targetTableAlias,
                         $targetTenantColumn,
@@ -88,25 +81,7 @@ class TenantFilter extends SQLFilter
                         $targetTableAlias,
                         $targetTenantColumn,
                     );
-                }
-                break;
-
-                // Если установлен ГЕНЕРАЛЬНЫЙ уровень изоляции, то...
-            case TenantAwareIsolation::GENERAL:
-                if (null === $tenant) {
-                    // ... в общем контексте доступны все сущности
-                    return '';
-                } else {
-                    // ... в контексте арендатора - его сущности и общие сущности
-                    return sprintf('%s.%s = %s OR %s.%s IS NULL',
-                        $targetTableAlias,
-                        $targetTenantColumn,
-                        $targetTenantId,
-                        $targetTableAlias,
-                        $targetTenantColumn,
-                    );
-                }
-                break;
+            }
         }
 
         return '';

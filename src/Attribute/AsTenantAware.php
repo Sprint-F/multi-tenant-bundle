@@ -6,8 +6,10 @@ namespace SprintF\Bundle\MultiTenant\Attribute;
 class AsTenantAware
 {
     public function __construct(
-        // Уровень изоляции данной сущности
-        public TenantAwareIsolation $isolation = TenantAwareIsolation::FULL,
+        // Уровень изоляции данной сущности в общем контексте
+        public CommonContextIsolation $commonContextIsolation = CommonContextIsolation::COMMON,
+        // Уровень изоляции данной сущности в частном контексте
+        public PrivateContextIsolation $privateContextIsolation = PrivateContextIsolation::TENANT,
     ) {
     }
 }
