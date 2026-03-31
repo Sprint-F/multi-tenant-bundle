@@ -41,7 +41,7 @@ class SprintFMultiTenantBundle extends AbstractBundle
                     ->info('The fully qualified class name of tenant entity')
                 ->end() // tenant_entity
 
-                // Конфигурация поля в моделях, указывающего на арендатора
+                // Конфигурация поля в сущностях, указывающего на арендатора
                 ->scalarNode('tenant_field')
                     ->cannotBeEmpty()
                     ->defaultValue('tenant')
