@@ -4,8 +4,10 @@
 Арендатор должен представлять собой класс, являющийся сущностью Doctrine.
 Этот класс указывается в конфиге по умолчанию, как ...
 ```yaml
-# The fully qualified class name of tenant entity
-tenant_entity: '\\App\\Entity\\Tenant'
+sprint_f_multi_tenant:
+  
+  # The fully qualified class name of tenant entity
+  tenant_entity: '\\App\\Entity\\Tenant'
 ```
 ... и может быть изменен.
 
@@ -22,7 +24,10 @@ class User
 ```
 Имя этого поля задается в конфигурации бандла, и по умолчанию эта конфигурация выглядит так:
 ```yaml
-tenant_field: 'tenant'
+sprint_f_multi_tenant:
+  
+  # The name of the tenant field in entities
+  tenant_field: 'tenant'
 ```
 Ожидаемое бандлом имя поля связи с арендатором можно изменить, используя конфигурацию.
 
@@ -33,7 +38,10 @@ tenant_field: 'tenant'
 
 Активируется указанием
 ```yaml
-resolver: query
+sprint_f_multi_tenant:
+  
+  # The name of the tenant resolver
+  resolver: query
 ```
 в конфигурации бандла (именно это значение подставляется по умолчанию, если не выбрано никакое другое).
 
@@ -43,15 +51,21 @@ resolver: query
 
 Конфигурация по умолчанию:
 ```yaml
-query:
-  parameter: tenant
+sprint_f_multi_tenant:
+  
+  query:
+    # Query parameter name to use for tenant resolution
+    parameter: tenant
 ```
 В конфигурации резолвера можно изменить имя параметра запроса (по умолчанию `tenant`), по которому определяется арендатор.
 
 ### Субдомен (subdomain)
 Активируется указанием
 ```yaml
-resolver: subdomain
+sprint_f_multi_tenant:
+  
+  # The name of the tenant resolver
+  resolver: subdomain
 ```
 в конфигурации бандла.
 
@@ -62,9 +76,13 @@ resolver: subdomain
 
 Конфигурация резолвера по умолчанию:
 ```yaml
-subdomain:
-  base_domain: localhost
-  excluded_subdomains: ['www', 'api', 'admin', 'mail', 'ftp']
+sprint_f_multi_tenant:
+  
+  subdomain:
+    # The base domain for subdomain resolution
+    base_domain: localhost
+    # Subdomains to exclude from tenant resolution
+    excluded_subdomains: ['www', 'api', 'admin', 'mail', 'ftp']
 ```
 В конфигурации можно настроить базовый домен (относительно которого будет определяться субдомен) и исключаемые из поиска
 арендатора служебные субдомены.
@@ -72,7 +90,10 @@ subdomain:
 ### Карта доменов (domains map)
 Активируется указанием
 ```yaml
-resolver: domain
+sprint_f_multi_tenant:
+
+  # The name of the tenant resolver
+  resolver: domain
 ```
 в конфигурации бандла.
 
@@ -83,13 +104,18 @@ resolver: domain
 
 Конфигурация резолвера по умолчанию:
 ```yaml
-domain:
-  domains_map: []
+sprint_f_multi_tenant:
+  
+  domain:
+    # Domains map (full domains to tenant slugs) for use for tenant resolution
+    domains_map: []
 ```
 Настройке подлежит карта соответствий "доменное имя - символьное имя арендатора". Пример:
 ```yaml
-domain:
-  domains_map:
-    - foo.example: foo
-    - test.example: test
+sprint_f_multi_tenant:
+  
+  domain:
+    domains_map:
+      - foo.example: foo
+      - test.example: test
 ```
